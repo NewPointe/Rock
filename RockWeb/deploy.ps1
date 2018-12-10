@@ -11,7 +11,7 @@ function Restore-RockFile([string] $RockWebFile) {
     $RockLocation = Join-Path $RootLocation $RockWebFile;
     $BackupLocation = Join-Path $TempLocation $RockWebFile;
     if (Test-Path $BackupLocation) {
-        Write-Information "Restoring '$RockWebFile'";
+        Write-Host "Restoring '$RockWebFile'";
         if(Test-Path $RockLocation) {
             Remove-Item $RockLocation -Recurse
         }
@@ -56,14 +56,21 @@ function Restore-RockPlugin([string] $PluginPackagePath) {
 }
 
 
-Write-Information "===== NP Rock Deployment script v0.1 =====";
-Write-Information "Mode: Post-deploy";
-Write-Information "Application: $env:APPVEYOR_PROJECT_NAME";
-Write-Information "Build Number: $env:APPVEYOR_BUILD_VERSION";
-Write-Information "Deploy Location: $RootLocation";
-Write-Information "==========================================";
+if(Test-Path "env:DEPLOY_DEBUG") {
+    Write-Host "================= DEBUG ==================";
+    Write-Host "Working Directories: $(Get-Location)";
+    Write-Host "Environment:";
+    Get-ChildItem "env:";
+}
 
-Write-Information "Restoring server-specific files";
+Write-Host "===== NP Rock Deployment script v0.1 =====";
+Write-Host "Mode: Post-deploy";
+Write-Host "Application: $env:APPVEYOR_PROJECT_NAME";
+Write-Host "Build Number: $env:APPVEYOR_BUILD_VERSION";
+Write-Host "Deploy Location: $RootLocation";
+Write-Host "==========================================";
+
+Write-Host "Restoring server-specific files";
 
 Restore-RockFile "web.config";
 Restore-RockFile "web.ConnectionStrings.config";
@@ -72,7 +79,7 @@ Restore-RockFile "App_Data\packages";
 Restore-RockFile "App_Data\RockShop";
 Restore-RockFile "App_Data\InstalledStorePackages.json";
 
-Write-Information "Rewriting Templated Files";
+Write-Host "Rewriting Templated Files";
 
 $TemplateFilenamePattern = "*.template.*" # something.template.txt
 $TemplateVariableRegex = "\[\[(\w+)]]";   # [[Variable_Name]]
@@ -81,7 +88,7 @@ $TemplateVariableRegex = "\[\[(\w+)]]";   # [[Variable_Name]]
 $TemplateFiles = Get-ChildItem $RootLocation -Recurse -Include $TemplateFilenamePattern;
 foreach($TemplateFile in $TemplateFiles) {
 
-    Write-Information "Rewriting $TemplateFile";
+    Write-Host "Rewriting $TemplateFile";
 
     # Get the raw contents
     $TemplateContents = Get-Content $TemplateFile -Raw;
@@ -111,7 +118,7 @@ foreach($TemplateFile in $TemplateFiles) {
     Set-Content $TemplateTempLocation $TemplateContents;
 }
 
-Write-Information "Reinstalling Plugin Files";
+Write-Host "Reinstalling Plugin Files";
 
 $InstalledPluginsPath = Join-Paths $RootLocation "App_Data" "RockShop";
 if(Test-Path $InstalledPluginsPath) {
@@ -123,7 +130,7 @@ if(Test-Path $InstalledPluginsPath) {
         if($PluginVersions.Count -gt 0) {
 
             $LatestVersion = $PluginVersions  | Sort-Object "Name" | Select-Object -Last 1;
-            Write-Information "Restoring ${Plugin.Name}";
+            Write-Host "Restoring ${Plugin.Name}";
             Restore-RockPlugin $LatestVersion.FullName;
 
         }
@@ -134,8 +141,8 @@ if(Test-Path $InstalledPluginsPath) {
 
 Remove-Item $TempLocation -Recurse -Force;
 
-Write-Information "Taking application out of maintenence mode";
+Write-Host "Taking application out of maintenence mode";
 
 Move-Item -Path (Join-Path $RootLocation "app_offline.htm") -Destination (Join-Path $RootLocation "app_offline-template.htm") -ErrorAction SilentlyContinue;
 
-Write-Information "Deployment script finished successfully";
+Write-Host "Deployment script finished successfully";
