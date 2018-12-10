@@ -105,7 +105,7 @@ foreach($TemplateFile in $TemplateFiles) {
         if(Test-Path "env:$EnvVar") {
             
             # Update it's value
-            $TemplateContents = $TemplateContents.Replace("[[$TemplateVariable]]", $(Get-Item "env:$EnvVar").TemplateVariable);
+            $TemplateContents = $TemplateContents.Replace("[[$TemplateVariable]]", (Get-Item "env:$EnvVar").Value);
         }
         else {
             Write-Warning "Could not update '[[$TemplateVariable]]' in '$TemplateFile'. Environment variable '$EnvVar' is not set.";
