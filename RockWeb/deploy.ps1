@@ -72,8 +72,9 @@ Write-Host "==========================================";
 
 Write-Host "Restoring server-specific files";
 
-Restore-RockFile "web.config";
-Restore-RockFile "web.ConnectionStrings.config";
+
+
+# Restore server-specifig files like static files, logs, plugin packages, and caches
 Restore-RockFile "App_Data\Files";
 Restore-RockFile "App_Data\Logs";
 Restore-RockFile "App_Data\packages";
@@ -81,6 +82,41 @@ Restore-RockFile "App_Data\RockShop";
 Restore-RockFile "App_Data\InstalledStorePackages.json";
 Restore-RockFile "Content";
 Restore-RockFile "wp-content";
+
+# We'll also restore the generated theme css since it takes forever to regenerate itself on startup.
+Backup-RockFile "Themes\CheckinAdventureKids\Styles\checkin-theme.css"
+Backup-RockFile "Themes\CheckinAtTheMovies\Styles\checkin-theme.css"
+Backup-RockFile "Themes\CheckinBlueCrystal\Styles\checkin-theme.css"
+Backup-RockFile "Themes\CheckinNewPointeOrange\Styles\checkin-theme.css"
+Backup-RockFile "Themes\CheckinPark\Styles\checkin-theme.css"
+Backup-RockFile "Themes\CheckinPointePark\Styles\checkin-theme.css"
+Backup-RockFile "Themes\DashboardStark\Styles\bootstrap.css"
+Backup-RockFile "Themes\DashboardStark\Styles\theme.css"
+Backup-RockFile "Themes\Flat\Styles\bootstrap.css"
+Backup-RockFile "Themes\Flat\Styles\theme.css"
+Backup-RockFile "Themes\KioskStark\Styles\bootstrap.css"
+Backup-RockFile "Themes\KioskStark\Styles\theme.css"
+Backup-RockFile "Themes\LandingPage\Styles\bootstrap.css"
+Backup-RockFile "Themes\LandingPage\Styles\theme.css"
+Backup-RockFile "Themes\NewFamilyCheckin\Styles\bootstrap.css"
+Backup-RockFile "Themes\NewFamilyCheckin\Styles\theme.css"
+Backup-RockFile "Themes\NewPointeInstitute\Styles\bootstrap.css"
+Backup-RockFile "Themes\NewPointeInstitute\Styles\theme.css"
+Backup-RockFile "Themes\NewpointeLive\Styles\bootstrap.css"
+Backup-RockFile "Themes\NewpointeLive\Styles\theme.css"
+Backup-RockFile "Themes\NewpointeMain\Styles\bootstrap.css"
+Backup-RockFile "Themes\NewpointeMain\Styles\theme.css"
+Backup-RockFile "Themes\PointeBlank\Styles\bootstrap.css"
+Backup-RockFile "Themes\PointeBlank\Styles\theme.css"
+Backup-RockFile "Themes\Rock\Styles\bootstrap.css"
+Backup-RockFile "Themes\Rock\Styles\email-editor.css"
+Backup-RockFile "Themes\Rock\Styles\theme.css"
+Backup-RockFile "Themes\RockOriginal\Styles\bootstrap.css"
+Backup-RockFile "Themes\RockOriginal\Styles\email-editor.css"
+Backup-RockFile "Themes\RockOriginal\Styles\font-awesome.css"
+Backup-RockFile "Themes\RockOriginal\Styles\theme.css"
+Backup-RockFile "Themes\Stark\Styles\bootstrap.css"
+Backup-RockFile "Themes\Stark\Styles\theme.css"
 
 Write-Host "Rewriting Templated Files";
 
