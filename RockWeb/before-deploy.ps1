@@ -42,9 +42,12 @@ Write-Host "Saving server-specific files";
 
 Backup-RockFile "web.config";
 Backup-RockFile "web.ConnectionStrings.config";
+Backup-RockFile "App_Data\Files";
 Backup-RockFile "App_Data\Logs";
 Backup-RockFile "App_Data\packages";
 Backup-RockFile "App_Data\RockShop";
 Backup-RockFile "App_Data\InstalledStorePackages.json";
+Backup-RockFile "Content";
+Backup-RockFile "wp-content";
 
 Write-Host "Deployment script finished successfully";

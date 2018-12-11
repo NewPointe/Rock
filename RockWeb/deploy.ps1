@@ -74,10 +74,13 @@ Write-Host "Restoring server-specific files";
 
 Restore-RockFile "web.config";
 Restore-RockFile "web.ConnectionStrings.config";
+Restore-RockFile "App_Data\Files";
 Restore-RockFile "App_Data\Logs";
 Restore-RockFile "App_Data\packages";
 Restore-RockFile "App_Data\RockShop";
 Restore-RockFile "App_Data\InstalledStorePackages.json";
+Restore-RockFile "Content";
+Restore-RockFile "wp-content";
 
 Write-Host "Rewriting Templated Files";
 
@@ -144,5 +147,6 @@ Remove-Item $TempLocation -Recurse -Force;
 Write-Host "Taking application out of maintenence mode";
 
 Move-Item -Path (Join-Path $RootLocation "app_offline.htm") -Destination (Join-Path $RootLocation "app_offline-template.htm") -ErrorAction SilentlyContinue;
+Remove-Item -Path (Join-Path $RootLocation "app_offline.htm") -ErrorAction SilentlyContinue;
 
 Write-Host "Deployment script finished successfully";
