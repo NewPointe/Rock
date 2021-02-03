@@ -77,29 +77,28 @@ namespace Rock.Model
         private bool _isActive = true;
 
         /// <summary>
-        /// Gets or sets the Id of the LocationType <see cref="Rock.Model.DefinedValue"/> that is used to identify the type of <see cref="Rock.Model.Location"/>
-        /// that this is.
+        /// Gets or sets the Id of the LocationType <see cref="Rock.Model.DefinedValue" /> that is used to identify the type of <see cref="Rock.Model.Location" />
+        /// that this is. Examples: Campus, Building, Room, etc
         /// </summary>
         /// <value>
-        /// An <see cref="System.Int32"/> referencing the Id of the LocationType <see cref="Rock.Model.DefinedValue"/> that identifies the type of group location that this is.
-        /// If a LocationType <see cref="Rock.Model.DefinedValue"/> is not associated with this GroupLocation this value will be null.
+        /// The location type value identifier.
         /// </value>
         [DataMember]
         [DefinedValue( SystemGuid.DefinedType.LOCATION_TYPE )]
         public int? LocationTypeValueId { get; set; }
 
         /// <summary>
-        /// Gets or sets the GeoPoint (geolocation) for the location
+        /// Gets or sets the GeoPoint (GeoLocation) for the location
         /// </summary>
         /// <value>
-        /// A <see cref="System.Data.Entity.Spatial.DbGeography"/> object that represents the geolocation of the Location.
+        /// A <see cref="System.Data.Entity.Spatial.DbGeography"/> object that represents the GeoLocation of the Location.
         /// </value>
         [DataMember]
         [Newtonsoft.Json.JsonConverter( typeof( DbGeographyConverter ) )]
         public DbGeography GeoPoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the geographic parameter around the a Location's Geopoint. This can also be used to define a large area
+        /// Gets or sets the geographic parameter around the a Location's GeoPoint. This can also be used to define a large area
         /// like a neighborhood.  
         /// </summary>
         /// <remarks>
@@ -678,28 +677,31 @@ namespace Rock.Model
         /// </returns>
         public override string ToString()
         {
-            string result = GetFullStreetAddress();
-
-            if ( string.IsNullOrEmpty( result ) )
+            if ( this.Name.IsNotNullOrWhiteSpace() )
             {
-                result = this.Name;
+                return this.Name;
             }
 
-            if ( string.IsNullOrWhiteSpace( result ) )
-            {
-                if ( this.GeoPoint != null )
-                {
-                    return string.Format( "A point at {0}, {1}", this.GeoPoint.Latitude, this.GeoPoint.Longitude );
-                }
+            string fullAddress = GetFullStreetAddress();
 
-                if ( this.GeoFence != null )
-                {
-                    int pointCount = this.GeoFence.PointCount ?? 0;
-                    return string.Format( "An area with {0} points", ( pointCount > 0 ? pointCount - 1 : 0 ) );
-                }
+            if ( fullAddress.IsNotNullOrWhiteSpace() )
+            {
+                return fullAddress;
             }
 
-            return result;
+            if ( this.GeoPoint != null )
+            {
+                return string.Format( "A point at {0}, {1}", this.GeoPoint.Latitude, this.GeoPoint.Longitude );
+            }
+
+            if ( this.GeoFence != null )
+            {
+                int pointCount = this.GeoFence.PointCount ?? 0;
+                return string.Format( "An area with {0} points", ( pointCount > 0 ? pointCount - 1 : 0 ) );
+            }
+
+            // this would only happen if Location didn't have a Name, Address, GeoPoint or GoeFence
+            return this.Name;
         }
 
         /// <summary>

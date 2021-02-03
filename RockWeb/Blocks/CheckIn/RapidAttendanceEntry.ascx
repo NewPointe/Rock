@@ -14,6 +14,10 @@
                     $('#<%= hfPersonDirty.ClientID %>').val('true')
                 });
 
+                 $('.js-person-item-checkbox').find('input').change(function () {
+                    $('#<%= hfPersonDirty.ClientID %>').val('true')
+                });
+
                 $('textarea.js-person-item').blur(function () {
                     if ($('textarea.js-person-item').val() !== '') {
                         $('#<%= hfPersonDirty.ClientID %>').val('true')
@@ -22,12 +26,6 @@
 
                 $('.js-main-event').click(function () {
                     if (isDirty()) {
-                        return false;
-                    }
-                });
-
-                $('.js-person-event').click(function () {
-                    if (isContactItemDirty()) {
                         return false;
                     }
                 });
@@ -50,16 +48,6 @@
                     $('#<%=btnGo.ClientID%>')[0].click();
                     return false;
                 }
-            }
-
-            function isContactItemDirty() {
-                if ($('#<%= hfPersonDirty.ClientID %>').val() == 'true') {
-                    if (confirm('You have not saved your changes. Are you sure you want to continue?')) {
-                        return false;
-                    }
-                    return true;
-                }
-                return false;
             }
 
         </script>
@@ -185,7 +173,7 @@
                                 <asp:LinkButton ID="lbEditPerson" runat="server" CssClass="btn btn-xs btn-square btn-default pull-right margin-t-lg js-main-event" CausesValidation="false" OnClick="lbEditPerson_Click"> <i title="Edit Person" class="fa fa-pencil"></i></asp:LinkButton>
                                 <asp:Literal ID="lPersonDetail" runat="server" />
 
-                                <Rock:RockCheckBoxList ID="rcbWorkFlowTypes" runat="server" RepeatDirection="Horizontal" RepeatColumns="3" FormGroupCssClass="margin-b-lg" CssClass="js-person-item" />
+                                <Rock:RockCheckBoxList ID="rcbWorkFlowTypes" runat="server" RepeatDirection="Horizontal" RepeatColumns="3" FormGroupCssClass="margin-b-lg" CssClass="js-person-item-checkbox" />
                                 <Rock:RockControlWrapper ID="rcwNotes" runat="server" CssClass="margin-b-lg">
                                     <Rock:RockDropDownList ID="ddlNoteType" runat="server" CssClass="input-width-xl input-xs pull-right" OnSelectedIndexChanged="ddlNoteType_SelectedIndexChanged" AutoPostBack="true" />
                                     <Rock:RockTextBox ID="tbNote" runat="server" Label="Note" TextMode="MultiLine" Rows="3" CssClass="js-person-item" />
@@ -334,6 +322,8 @@
                                                     <asp:ListItem Text="Email" Value="1" />
                                                     <asp:ListItem Text="SMS" Value="2" />
                                                 </Rock:RockRadioButtonList>
+
+                                                <Rock:NotificationBox ID="nbCommunicationPreferenceWarning" runat="server" NotificationBoxType="Warning" Visible="false" />
                                             </div>
                                         </div>
                                     </div>
