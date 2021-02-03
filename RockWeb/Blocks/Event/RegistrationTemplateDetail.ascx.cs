@@ -187,7 +187,7 @@ namespace RockWeb.Blocks.Event
     This {{ RegistrationInstance.RegistrationTemplate.RegistrationTerm | Downcase  }} has a remaining balance
     of {{ currencySymbol }}{{ Registration.BalanceDue | Format:'#,##0.00' }}.
     You can complete the payment for this {{ RegistrationInstance.RegistrationTemplate.RegistrationTerm | Downcase }}
-    using our <a href='{{ externalSite }}/Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
+    using our <a href='{{ externalSite }}Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
     online registration page</a>.
 </p>
 {% endif %}
@@ -318,7 +318,7 @@ namespace RockWeb.Blocks.Event
 
 <p>
     You can complete the payment for this {{ RegistrationInstance.RegistrationTemplate.RegistrationTerm | Downcase }}
-    using our <a href='{{ externalSite }}/Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
+    using our <a href='{{ externalSite }}Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
     online registration page</a>.
 </p>
 
@@ -347,7 +347,7 @@ namespace RockWeb.Blocks.Event
 {% if AdditionalFieldsNeeded %}
     <p>
         <strong>Addition information is needed in order to process this registration. Please visit the
-        <a href='{{ externalSite }}/Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}&StartAtBeginning=True'>
+        <a href='{{ externalSite }}Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}&StartAtBeginning=True'>
         online registration page</a> to complete the registration.</strong>
     </p>
 {% endif %}
@@ -355,7 +355,7 @@ namespace RockWeb.Blocks.Event
 {% if Registration.BalanceDue > 0 %}
     <p>
         A balance of {{ currencySymbol }}{{ Registration.BalanceDue | Format:'#,##0.00' }} remains on this registration. You can complete the payment for this {{ RegistrationInstance.RegistrationTemplate.RegistrationTerm | Downcase }}
-        using our <a href='{{ externalSite }}/Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
+        using our <a href='{{ externalSite }}Registration?RegistrationId={{ Registration.Id }}&rckipid={{ Registration.PersonAlias.Person | PersonTokenCreate }}'>
         online registration page</a>.
     </p>
 {% endif %}
@@ -850,6 +850,7 @@ The logged-in person's information will be used to complete the registrar inform
                     if ( FormFieldsState.ContainsKey( form.Guid ) )
                     {
                         newFormFieldsState.Add( newForm.Guid, new List<RegistrationTemplateFormField>() );
+                        var mapKeys = new Dictionary<Guid, Guid>();
                         foreach ( var formField in FormFieldsState[form.Guid] )
                         {
                             var newFormField = formField.Clone( false );
@@ -857,6 +858,7 @@ The logged-in person's information will be used to complete the registrar inform
                             newFormField.Id = 0;
                             newFormField.Guid = Guid.NewGuid();
                             newFormFieldsState[newForm.Guid].Add( newFormField );
+                            mapKeys.Add( formField.Guid, newFormField.Guid );
 
                             if ( formField.FieldSource != RegistrationFieldSource.PersonField )
                             {
@@ -881,6 +883,17 @@ The logged-in person's information will be used to complete the registrar inform
                                     newQualifier.IsSystem = false;
                                     newAttribute.AttributeQualifiers.Add( qualifier );
                                 }
+                            }
+                        }
+
+                        var newFormFieldsWithRules = newFormFieldsState[newForm.Guid]
+                                                        .Where( a => a.FieldVisibilityRules.RuleList
+                                                                        .Any( b => b.ComparedToRegistrationTemplateFormFieldGuid.HasValue ) );
+                        foreach ( var newFormField in newFormFieldsWithRules )
+                        {
+                            foreach ( var rule in newFormField.FieldVisibilityRules.RuleList.Where( a => a.ComparedToRegistrationTemplateFormFieldGuid.HasValue ) )
+                            {
+                                rule.ComparedToRegistrationTemplateFormFieldGuid = mapKeys.GetValueOrNull(rule.ComparedToRegistrationTemplateFormFieldGuid.Value);
                             }
                         }
                     }
@@ -1640,6 +1653,22 @@ The logged-in person's information will be used to complete the registrar inform
 
             if ( FormFieldsState.ContainsKey( e.FormGuid ) )
             {
+                /*
+                  SK - 11 Oct 2020
+                  On Field Delete, we need to also remove all the exisiting reference of current field in filter rule list
+                */
+                var newFormFieldsWithRules = FormFieldsState[e.FormGuid]
+                    .Where( a => a.FieldVisibilityRules.RuleList.Any()
+                     && a.FieldVisibilityRules.RuleList.Any( b =>
+                         b.ComparedToRegistrationTemplateFormFieldGuid.HasValue
+                         && b.ComparedToRegistrationTemplateFormFieldGuid == e.FormFieldGuid ) );
+
+                foreach ( var newFormField in newFormFieldsWithRules )
+                {
+                    newFormField.FieldVisibilityRules.RuleList
+                        .RemoveAll( a => a.ComparedToRegistrationTemplateFormFieldGuid.HasValue
+                        && a.ComparedToRegistrationTemplateFormFieldGuid.Value == e.FormFieldGuid );
+                }
                 FormFieldsState[e.FormGuid].RemoveEntity( e.FormFieldGuid );
             }
 
